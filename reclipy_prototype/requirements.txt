@@ -1,5 +1,0 @@
-flask
-transformers
-diffusers
-gTTS
-moviepy 

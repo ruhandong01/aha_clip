@@ -2,7 +2,7 @@
 make your idea into real editable video
 
 # Production Workflow Design
-## front page
+## Front Page
 We have a text input box in the html page to allow users to input their story ideas
 
 # Technical Function Module
@@ -13,6 +13,10 @@ We have a text input box in the html page to allow users to input their story id
 # Local Test Set Up
 
 ## 1. Start Python Web Server
-Run the following command in your terminal from the project root directory: python3 -m http.server
+Run the following command in your terminal from the project root directory: 
+```python
+python3 -m http.server
+```
+
 
 ## 2. Right click and select inspect to check the browse output

@@ -1,4 +1,7 @@
 # aha_clip
 make your idea into real editable video
 
-XXXXX Ruhan is great!
+# front page
+We have a text input box in the html page to allow users to input their story ideas
+
+Test

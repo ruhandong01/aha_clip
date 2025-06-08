@@ -16,23 +16,23 @@
     <script>
         document.querySelector('.generate-button').addEventListener('click', function() {
             const storyInput = document.querySelector('.story-input').value;
-            const sentences = storyInput.split('.'); // 简单分句
+            const sentences = storyInput.split('.'); // sentence splitting
             
-            // 1. 为每个句子生成漫画风格的图像
+            // 1. Generate comic-style images for each sentence
             sentences.forEach(sentence => {
                 if (sentence.trim()) {
-                    // 调用图像生成API或函数
-                    console.log(`生成图像: ${sentence}`);
+                    // Call image generation API or function
+                    console.log(`Generate image: ${sentence}`);
                 }
             });
 
-            // 2. 生成旁白
-            // 调用语音合成API或函数
-            console.log('生成旁白');
+            // 2. Generate voice-over
+            // Call speech synthesis API or function
+            console.log('Generate Voice-over');
 
-            // 3. 自动匹配旁白和照片并制作视频
-            // 调用视频合成API或函数
-            console.log('制作视频');
+            // 3. Automatically match voice-over and photos to create video
+            // Call video synthesis API or function
+            console.log('Create video');
         });
     </script>
 </body>

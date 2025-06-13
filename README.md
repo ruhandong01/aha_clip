@@ -15,7 +15,7 @@ We have a text input box in the html page to allow users to input their story id
 ## 1. Start Python Web Server
 Run the following command in your terminal from the project root directory: 
 ```python
-python3 -m http.server
+python server.py
 ```
 
 

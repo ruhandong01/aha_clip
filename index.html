@@ -12,26 +12,60 @@
         <p>Make your idea into real editable video</p>
         <textarea class="story-input" placeholder="Enter your story idea here..."></textarea>
         <button class="generate-button">Generate Video</button>
+        <div id="generated-sentences" class="generated-sentences"></div>
     </div>
     <script>
-        document.querySelector('.generate-button').addEventListener('click', function() {
+        async function generateSentences(prompt) {
+            try {
+                const response = await fetch('http://localhost:5000/generate-sentences', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ prompt })
+                });
+
+                const data = await response.json();
+                if (!data.success) {
+                    throw new Error(data.error);
+                }
+                return data.sentences;
+            } catch (error) {
+                console.error('Error generating sentences:', error);
+                return [];
+            }
+        }
+
+        document.querySelector('.generate-button').addEventListener('click', async function() {
+            console.log('oooooooo');
             const storyInput = document.querySelector('.story-input').value;
-            const sentences = storyInput.split('.'); // sentence splitting
+            const sentencesContainer = document.getElementById('generated-sentences');
             
-            // 1. Generate comic-style images for each sentence
-            sentences.forEach(sentence => {
+            // Show loading state
+            sentencesContainer.innerHTML = 'Generating sentences...';
+            
+            // Generate sentences using our Python server
+            const generatedSentences = await generateSentences(storyInput);
+            
+            // Output generated sentences to console for debugging
+            console.log('Generated sentences:', generatedSentences);
+            
+            // Display generated sentences
+            sentencesContainer.innerHTML = generatedSentences
+                .map(sentence => `<p>${sentence}</p>`)
+                .join('');
+
+            // Process each sentence for image generation
+            generatedSentences.forEach(sentence => {
                 if (sentence.trim()) {
-                    // Call image generation API or function
                     console.log(`Generate image: ${sentence}`);
                 }
             });
 
-            // 2. Generate voice-over
-            // Call speech synthesis API or function
+            // Generate voice-over
             console.log('Generate Voice-over');
 
-            // 3. Automatically match voice-over and photos to create video
-            // Call video synthesis API or function
+            // Create video
             console.log('Create video');
         });
     </script>

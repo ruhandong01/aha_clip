@@ -12,7 +12,7 @@
         <p>Make your idea into real editable video</p>
         <textarea class="story-input" placeholder="Enter your story idea here..."></textarea>
         <button class="generate-button">Generate Video</button>
-        <div id="generated-sentences" class="generated-sentences"></div>
+        <div id="generated-content" class="generated-content"></div>
     </div>
     <script>
         async function generateSentences(prompt) {
@@ -36,37 +36,90 @@
             }
         }
 
-        document.querySelector('.generate-button').addEventListener('click', async function() {
-            console.log('oooooooo');
-            const storyInput = document.querySelector('.story-input').value;
-            const sentencesContainer = document.getElementById('generated-sentences');
-            
-            // Show loading state
-            sentencesContainer.innerHTML = 'Generating sentences...';
-            
-            // Generate sentences using our Python server
-            const generatedSentences = await generateSentences(storyInput);
-            
-            // Output generated sentences to console for debugging
-            console.log('Generated sentences:', generatedSentences);
-            
-            // Display generated sentences
-            sentencesContainer.innerHTML = generatedSentences
-                .map(sentence => `<p>${sentence}</p>`)
-                .join('');
+        async function generateImage(prompt) {
+            try {
+                const response = await fetch('http://localhost:5000/generate-image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ prompt })
+                });
 
-            // Process each sentence for image generation
-            generatedSentences.forEach(sentence => {
-                if (sentence.trim()) {
-                    console.log(`Generate image: ${sentence}`);
+                const data = await response.json();
+                if (!data.success) {
+                    throw new Error(data.error);
                 }
-            });
+                return data.image;
+            } catch (error) {
+                console.error('Error generating image:', error);
+                return null;
+            }
+        }
 
-            // Generate voice-over
-            console.log('Generate Voice-over');
+        document.querySelector('.generate-button').addEventListener('click', async function() {
+            const storyInput = document.querySelector('.story-input').value;
+            const contentContainer = document.getElementById('generated-content');
+            
+            // Show initial loading state
+            contentContainer.innerHTML = '<p class="loading-text">Generating sentences...</p>';
+            
+            try {
+                // Generate sentences first
+                const generatedSentences = await generateSentences(storyInput);
+                console.log('Generated sentences array:', generatedSentences);
+                
+                // Clear container and create content
+                contentContainer.innerHTML = '';
+                
+                // First, display all sentences
+                const sentenceContainers = generatedSentences.map(sentence => {
+                    const itemContainer = document.createElement('div');
+                    itemContainer.className = 'content-item';
 
-            // Create video
-            console.log('Create video');
+                    // Add sentence
+                    const sentenceElement = document.createElement('p');
+                    sentenceElement.textContent = sentence;
+                    itemContainer.appendChild(sentenceElement);
+                    
+                    // Add loading indicator
+                    const loadingElement = document.createElement('p');
+                    loadingElement.className = 'loading-text';
+                    loadingElement.textContent = 'Generating image...';
+                    itemContainer.appendChild(loadingElement);
+
+                    
+                    contentContainer.appendChild(itemContainer);
+                    return itemContainer;
+                });
+                
+                // Then, generate images one by one
+                for (let i = 0; i < generatedSentences.length; i++) {
+                    const sentence = generatedSentences[i];
+                    const container = sentenceContainers[i];
+                
+                    
+                    // Generate and add image
+                    const imageData = await generateImage(sentence);
+
+                    // Remove loading text
+                    container.querySelector('.loading-text').remove();
+
+                    if (imageData) {
+                        const img = document.createElement('img');
+                        img.src = `data:image/png;base64,${imageData}`;
+                        img.className = 'generated-image';
+                        container.appendChild(img);
+                    } else {
+                        const errorElement = document.createElement('p');
+                        errorElement.className = 'error-text';
+                        errorElement.textContent = 'Failed to generate image';
+                        container.appendChild(errorElement);
+                    }
+                }
+            } catch (error) {
+                contentContainer.innerHTML = `<p class="error-text">Error: ${error.message}</p>`;
+            }
         });
     </script>
 </body>

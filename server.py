@@ -15,7 +15,7 @@ app = Flask(__name__, static_url_path='')
 CORS(app)  # Enable CORS for all routes
 
 # Configure OpenAI API
-openai.api_key = "sk-P8_ugLpBonQCPIaATxF0VTBsUfhQj0O5IxmuiFkKsMT3BlbkFJAeliIKf9Vg0QAFfhNa8jRrORY28BucjmPcHsvJpIAA"
+openai.api_key = "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"
 
 @app.route('/')
 def serve_index():

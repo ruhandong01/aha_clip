@@ -163,10 +163,20 @@
                     const itemContainer = document.createElement('div');
                     itemContainer.className = 'content-item';
 
-                    // Add sentence
-                    const sentenceElement = document.createElement('p');
-                    sentenceElement.textContent = sentence;
-                    itemContainer.appendChild(sentenceElement);
+                    // Add editable sentence textarea
+                    const sentenceTextarea = document.createElement('textarea');
+                    sentenceTextarea.className = 'editable-sentence';
+                    sentenceTextarea.value = sentence;
+                    sentenceTextarea.rows = 2;
+                    sentenceTextarea.placeholder = 'Edit your sentence here...';
+                    itemContainer.appendChild(sentenceTextarea);
+                    
+                    // Add save button for sentence
+                    const saveButton = document.createElement('button');
+                    saveButton.className = 'save-sentence-btn';
+                    saveButton.textContent = 'Save Changes';
+                    saveButton.style.display = 'none';
+                    itemContainer.appendChild(saveButton);
                     
                     // Add loading indicator
                     const loadingElement = document.createElement('p');
@@ -206,6 +216,104 @@
             } catch (error) {
                 contentContainer.innerHTML = `<p class="error-text">Error: ${error.message}</p>`;
             }
+        });
+    </script>
+
+    <script>
+        // Add event listeners for editable sentences
+        document.addEventListener('DOMContentLoaded', function() {
+            // Delegate event listeners for dynamically created elements
+            document.addEventListener('input', function(e) {
+                if (e.target.classList.contains('editable-sentence')) {
+                    const saveButton = e.target.nextElementSibling;
+                    if (saveButton && saveButton.classList.contains('save-sentence-btn')) {
+                        saveButton.style.display = 'inline-block';
+                        
+                        // Add visual indicator for unsaved changes
+                        e.target.classList.add('has-unsaved-changes');
+                    }
+                }
+            });
+
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('save-sentence-btn')) {
+                    const textarea = e.target.previousElementSibling;
+                    const newText = textarea.value;
+                    
+                    // Here you can add logic to save the changes
+                    console.log('Saving sentence:', newText);
+                    
+                    // Hide the save button after saving
+                    e.target.style.display = 'none';
+                    
+                    // Remove unsaved changes indicator
+                    textarea.classList.remove('has-unsaved-changes');
+                    
+                    // Optional: Show a brief success message
+                    const successMsg = document.createElement('span');
+                    successMsg.textContent = ' ✓ Saved';
+                    successMsg.style.color = '#10B981';
+                    successMsg.style.fontSize = '0.875rem';
+                    successMsg.style.marginLeft = '0.5rem';
+                    
+                    e.target.parentNode.insertBefore(successMsg, e.target.nextSibling);
+                    
+                    // Remove success message after 2 seconds
+                    setTimeout(() => {
+                        if (successMsg.parentNode) {
+                            successMsg.remove();
+                        }
+                    }, 2000);
+                    
+                    // Add regenerate image button if not already present
+                    const container = e.target.parentNode;
+                    if (!container.querySelector('.regenerate-image-btn')) {
+                        const regenerateBtn = document.createElement('button');
+                        regenerateBtn.className = 'regenerate-image-btn';
+                        regenerateBtn.textContent = '🔄 Regenerate Image';
+                        regenerateBtn.style.marginTop = '0.5rem';
+                        regenerateBtn.style.marginRight = '0.5rem';
+                        
+                        regenerateBtn.addEventListener('click', async function() {
+                            const sentence = textarea.value;
+                            const existingImage = container.querySelector('.generated-image');
+                            
+                            if (existingImage) {
+                                // Show loading state
+                                regenerateBtn.textContent = '🔄 Generating...';
+                                regenerateBtn.disabled = true;
+                                
+                                try {
+                                    const newImageData = await generateImage(sentence);
+                                    if (newImageData) {
+                                        existingImage.src = `data:image/png;base64,${newImageData}`;
+                                        regenerateBtn.textContent = '✅ Image Updated';
+                                        setTimeout(() => {
+                                            regenerateBtn.textContent = '🔄 Regenerate Image';
+                                            regenerateBtn.disabled = false;
+                                        }, 2000);
+                                    } else {
+                                        regenerateBtn.textContent = '❌ Failed';
+                                        setTimeout(() => {
+                                            regenerateBtn.textContent = '🔄 Regenerate Image';
+                                            regenerateBtn.disabled = false;
+                                        }, 2000);
+                                    }
+                                } catch (error) {
+                                    console.error('Error regenerating image:', error);
+                                    regenerateBtn.textContent = '❌ Error';
+                                    setTimeout(() => {
+                                        regenerateBtn.textContent = '🔄 Regenerate Image';
+                                        regenerateBtn.disabled = false;
+                                    }, 2000);
+                                }
+                            }
+                        });
+                        
+                        container.appendChild(regenerateBtn);
+                    }
+                }
+            });
         });
     </script>
 </body>

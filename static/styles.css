@@ -259,11 +259,12 @@ body {
 }
 
 .content-item {
-    background-color: white;
-    padding: 1rem;
-    border-radius: 0.5rem;
-    margin-bottom: 1rem;
+    background-color: var(--background-white);
+    padding: 1.5rem;
+    border-radius: 0.75rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color);
 }
 
 .generated-image {
@@ -332,8 +333,9 @@ body {
 }
 
 .error-text {
-    color: #DC2626;
-    font-weight: 500;
+    color: #EF4444;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
 }
 
 /* Responsive Design */
@@ -385,4 +387,78 @@ body {
     height: 100%;
     border: 0;
     border-radius: 1rem;
+}
+
+/* Editable Sentence Styles */
+.editable-sentence {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: 0.5rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    line-height: 1.5;
+    resize: vertical;
+    min-height: 60px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background-color: var(--background-white);
+    margin-bottom: 0.5rem;
+}
+
+.editable-sentence:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.editable-sentence:hover {
+    border-color: #D1D5DB;
+}
+
+.editable-sentence.has-unsaved-changes {
+    border-color: #F59E0B;
+    background-color: #FFFBEB;
+}
+
+.editable-sentence.has-unsaved-changes:focus {
+    border-color: #F59E0B;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+}
+
+.save-sentence-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-bottom: 0.5rem;
+}
+
+.save-sentence-btn:hover {
+    background-color: var(--primary-hover);
+}
+
+.regenerate-image-btn {
+    background-color: #F59E0B;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.regenerate-image-btn:hover:not(:disabled) {
+    background-color: #D97706;
+}
+
+.regenerate-image-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 } 

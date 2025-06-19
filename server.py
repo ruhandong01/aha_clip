@@ -15,7 +15,7 @@ app = Flask(__name__, static_url_path='')
 CORS(app)  # Enable CORS for all routes
 
 # Configure OpenAI API
-openai.api_key = "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"
+openai.api_key = "your_api_key"
 
 @app.route('/')
 def serve_index():
@@ -95,4 +95,4 @@ def generate_image():
         }), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000) 
+    app.run(debug=True, port=5001) 

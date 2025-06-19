@@ -7,7 +7,9 @@ We have a text input box in the html page to allow users to input their story id
 
 # Technical Function Module
 1. Sentence Generation: according to the user prompt, we generate story of 6 sentence.
+Requirement: The sentence output should be editable by users.
 2. Image Generation: after we finished the sentence generation, we generate image for each sentence. In our first use case, generate 6 image out of 6 sentence using openai API.
+Requirement: Users can upload their own photo to replace the output photo.
 2. Voice Generation: generate a voice-over based on user input text or enriched user input text.
 3. Voice-Photo Match: auto-match voice-over and photos and make it a video. 
 

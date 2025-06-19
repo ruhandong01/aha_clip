@@ -103,7 +103,7 @@
     <script>
         async function generateSentences(prompt) {
             try {
-                const response = await fetch('http://localhost:5000/generate-sentences', {
+                const response = await fetch('generate-sentences', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -124,7 +124,7 @@
 
         async function generateImage(prompt) {
             try {
-                const response = await fetch('http://localhost:5000/generate-image', {
+                const response = await fetch('generate-image', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

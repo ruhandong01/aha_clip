@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, render_template
 from flask_cors import CORS
 import openai
 import os
@@ -19,11 +19,7 @@ openai.api_key = "sk-proj-3vZyYK0HYGuZdkuCN4p6aS1rGD8qBLmhOkjPPFxCGEBnZQVVvsj3bz
 
 @app.route('/')
 def serve_index():
-    return send_from_directory('.', 'index.html')
-
-@app.route('/<path:path>')
-def serve_static(path):
-    return send_from_directory('.', path)
+    return render_template('index.html')
 
 @app.route('/generate-sentences', methods=['POST'])
 def generate_sentences():
@@ -50,7 +46,7 @@ def generate_sentences():
 
         generated_text = response.choices[0].message.content
         # Robustly split sentences, handle numbered lists, extra newlines, etc.
-        sentences = re.split(r'\d+\.\s*', generated_text)
+        sentences = re.split(r'\.', generated_text)
         sentences = [s.strip() for s in sentences if s.strip()]
         sentences = sentences[:6]  # Always return at most 6
         while len(sentences) < 6:

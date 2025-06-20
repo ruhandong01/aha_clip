@@ -71,6 +71,12 @@
                 <textarea class="story-input" placeholder="Enter your story idea here..."></textarea>
                 <button class="generate-button">Generate Video</button>
                 <div id="generated-content" class="generated-content"></div>
+                <div id="video-controls" class="video-controls" style="display: none; margin-top: 20px; text-align: center;">
+                    <button id="save-to-video-btn" class="save-to-video-button" style="background-color: #10B981; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background-color 0.3s;">
+                        🎬 Save to Video
+                    </button>
+                    <div id="video-status" class="video-status" style="margin-top: 10px; font-size: 14px; color: #6B7280;"></div>
+                </div>
             </div>
         </div>
     </section>
@@ -228,6 +234,20 @@
                             console.log('Generated audio URL:', audioUrl);
                             
                             if (audioUrl) {
+                                // Store the audio URL in the button's dataset for video generation
+                                playButton.dataset.audioUrl = audioUrl;
+                                
+                                // Add visual indicator that audio is ready
+                                playButton.title = 'Play voice (Audio ready for video)';
+                                playButton.style.border = '2px solid #10B981';
+                                
+                                // Update audio status indicator
+                                const audioStatus = itemContainer.querySelector('.audio-status');
+                                if (audioStatus) {
+                                    audioStatus.textContent = '🔊 Audio ready for video';
+                                    audioStatus.style.color = '#10B981';
+                                }
+                                
                                 // Create audio element and play
                                 const audio = new Audio(audioUrl);
                                 
@@ -294,6 +314,15 @@
                     sentenceWrapper.appendChild(playButton);
                     itemContainer.appendChild(sentenceWrapper);
                     
+                    // Add audio status indicator
+                    const audioStatus = document.createElement('div');
+                    audioStatus.className = 'audio-status';
+                    audioStatus.textContent = '🔇 No audio generated';
+                    audioStatus.style.fontSize = '12px';
+                    audioStatus.style.color = '#6B7280';
+                    audioStatus.style.marginTop = '5px';
+                    itemContainer.appendChild(audioStatus);
+                    
                     // Add save button for sentence
                     const saveButton = document.createElement('button');
                     saveButton.className = 'save-sentence-btn';
@@ -336,8 +365,154 @@
                         container.appendChild(errorElement);
                     }
                 }
+                
+                // Show the video controls after content is generated
+                document.getElementById('video-controls').style.display = 'block';
+                
             } catch (error) {
                 contentContainer.innerHTML = `<p class="error-text">Error: ${error.message}</p>`;
+            }
+        });
+
+        // Function to save content to video
+        async function saveToVideo() {
+            const contentContainer = document.getElementById('generated-content');
+            const saveButton = document.getElementById('save-to-video-btn');
+            const statusDiv = document.getElementById('video-status');
+            
+            // Get all content items
+            const contentItems = [];
+            const itemContainers = contentContainer.querySelectorAll('.content-item');
+            
+            // First pass: collect existing content and identify missing audio
+            const itemsNeedingAudio = [];
+            
+            for (let i = 0; i < itemContainers.length; i++) {
+                const container = itemContainers[i];
+                const textarea = container.querySelector('.editable-sentence');
+                const image = container.querySelector('.generated-image');
+                
+                if (textarea && image) {
+                    const text = textarea.value;
+                    const imageSrc = image.src;
+                    
+                    // Extract base64 data from image src
+                    const base64Data = imageSrc.split(',')[1];
+                    
+                    // Check if audio URL exists
+                    let audioUrl = null;
+                    const playButton = container.querySelector('.play-voice-btn');
+                    if (playButton && playButton.dataset.audioUrl) {
+                        audioUrl = playButton.dataset.audioUrl;
+                        console.log(`Item ${i}: Found existing audio URL: ${audioUrl}`);
+                    } else {
+                        console.log(`Item ${i}: No audio URL found, will generate voice for: "${text}"`);
+                        itemsNeedingAudio.push({
+                            index: i,
+                            text: text,
+                            container: container
+                        });
+                    }
+                    
+                    contentItems.push({
+                        text: text,
+                        image: base64Data,
+                        audio_url: audioUrl
+                    });
+                }
+            }
+            
+            if (contentItems.length === 0) {
+                statusDiv.textContent = 'No content available to save to video';
+                return;
+            }
+            
+            // Update UI to show processing
+            saveButton.disabled = true;
+            saveButton.textContent = '🎬 Generating Video...';
+            statusDiv.textContent = 'Creating your video... This may take a few minutes.';
+            
+            // Generate missing audio files
+            if (itemsNeedingAudio.length > 0) {
+                statusDiv.textContent = `Generating voice for ${itemsNeedingAudio.length} sentences...`;
+                
+                for (const item of itemsNeedingAudio) {
+                    try {
+                        console.log(`Generating voice for item ${item.index}: "${item.text}"`);
+                        const audioUrl = await generateVoice(item.text);
+                        
+                        if (audioUrl) {
+                            // Store the audio URL in the button's dataset
+                            const playButton = item.container.querySelector('.play-voice-btn');
+                            if (playButton) {
+                                playButton.dataset.audioUrl = audioUrl;
+                                playButton.title = 'Play voice (Audio ready for video)';
+                                playButton.style.border = '2px solid #10B981';
+                            }
+                            
+                            // Update audio status indicator
+                            const audioStatus = item.container.querySelector('.audio-status');
+                            if (audioStatus) {
+                                audioStatus.textContent = '🔊 Audio ready for video';
+                                audioStatus.style.color = '#10B981';
+                            }
+                            
+                            // Update the contentItems array
+                            contentItems[item.index].audio_url = audioUrl;
+                            console.log(`✅ Generated audio for item ${item.index}: ${audioUrl}`);
+                        } else {
+                            console.error(`❌ Failed to generate audio for item ${item.index}`);
+                        }
+                    } catch (error) {
+                        console.error(`Error generating voice for item ${item.index}:`, error);
+                    }
+                }
+            }
+            
+            // Log final content items for debugging
+            console.log('Final content items for video generation:', contentItems.map((item, i) => ({
+                index: i,
+                text: item.text.substring(0, 50) + '...',
+                hasImage: !!item.image,
+                hasAudio: !!item.audio_url,
+                audioUrl: item.audio_url
+            })));
+            
+            statusDiv.textContent = 'Creating your video... This may take a few minutes.';
+            
+            try {
+                const response = await fetch('/save-to-video', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ content_items: contentItems })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    statusDiv.innerHTML = `✅ Video generated successfully! <a href="${data.video_url}" target="_blank" style="color: #10B981; text-decoration: underline;">Download Video</a>`;
+                    saveButton.textContent = '🎬 Video Ready!';
+                    saveButton.style.backgroundColor = '#10B981';
+                } else {
+                    statusDiv.textContent = `❌ Error: ${data.error}`;
+                    saveButton.textContent = '🎬 Save to Video';
+                    saveButton.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error saving to video:', error);
+                statusDiv.textContent = `❌ Error: ${error.message}`;
+                saveButton.textContent = '🎬 Save to Video';
+                saveButton.disabled = false;
+            }
+        }
+
+        // Add event listener for save to video button
+        document.addEventListener('DOMContentLoaded', function() {
+            const saveToVideoBtn = document.getElementById('save-to-video-btn');
+            if (saveToVideoBtn) {
+                saveToVideoBtn.addEventListener('click', saveToVideo);
             }
         });
     </script>

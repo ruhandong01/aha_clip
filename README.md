@@ -11,7 +11,7 @@ Requirement: The sentence output should be editable by users.
 2. Image Generation: after we finished the sentence generation, we generate image for each sentence. In our first use case, generate 6 image out of 6 sentence using openai API.
 Requirement: Users can upload their own photo to replace the output photo.
 2. Voice Generation: generate a voice-over based on user input text or enriched user input text.
-3. Voice-Photo Match: auto-match voice-over and photos and make it a video. 
+Requirement: for each sentence and image, generate voice based on user text and automatically play it. 
 
 # Local Test Set Up
 

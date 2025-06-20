@@ -143,6 +143,27 @@
             }
         }
 
+        async function generateVoice(text) {
+            try {
+                const response = await fetch('generate-voice', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text })
+                });
+
+                const data = await response.json();
+                if (!data.success) {
+                    throw new Error(data.error);
+                }
+                return data.audio_url;
+            } catch (error) {
+                console.error('Error generating voice:', error);
+                return null;
+            }
+        }
+
         document.querySelector('.generate-button').addEventListener('click', async function() {
             const storyInput = document.querySelector('.story-input').value;
             const contentContainer = document.getElementById('generated-content');
@@ -163,13 +184,115 @@
                     const itemContainer = document.createElement('div');
                     itemContainer.className = 'content-item';
 
+                    // Create a wrapper for sentence and play button
+                    const sentenceWrapper = document.createElement('div');
+                    sentenceWrapper.className = 'sentence-wrapper';
+                    
                     // Add editable sentence textarea
                     const sentenceTextarea = document.createElement('textarea');
                     sentenceTextarea.className = 'editable-sentence';
                     sentenceTextarea.value = sentence;
                     sentenceTextarea.rows = 2;
                     sentenceTextarea.placeholder = 'Edit your sentence here...';
-                    itemContainer.appendChild(sentenceTextarea);
+                    sentenceWrapper.appendChild(sentenceTextarea);
+                    
+                    // Add play button for voice
+                    const playButton = document.createElement('button');
+                    playButton.className = 'play-voice-btn';
+                    playButton.innerHTML = '🔊';
+                    playButton.title = 'Play voice';
+                    playButton.style.display = 'inline-block';
+                    playButton.style.marginLeft = '10px';
+                    playButton.style.padding = '8px 12px';
+                    playButton.style.border = 'none';
+                    playButton.style.borderRadius = '4px';
+                    playButton.style.backgroundColor = '#3B82F6';
+                    playButton.style.color = 'white';
+                    playButton.style.cursor = 'pointer';
+                    playButton.style.fontSize = '16px';
+                    
+                    // Add voice generation functionality
+                    playButton.addEventListener('click', async function() {
+                        const text = sentenceTextarea.value;
+                        if (!text.trim()) {
+                            alert('Please enter some text to generate voice');
+                            return;
+                        }
+                        
+                        // Show loading state
+                        playButton.innerHTML = '⏳';
+                        playButton.disabled = true;
+                        
+                        try {
+                            const audioUrl = await generateVoice(text);
+                            console.log('Generated audio URL:', audioUrl);
+                            
+                            if (audioUrl) {
+                                // Create audio element and play
+                                const audio = new Audio(audioUrl);
+                                
+                                // Add event listeners for debugging
+                                audio.addEventListener('loadstart', () => console.log('Audio loading started'));
+                                audio.addEventListener('canplay', () => console.log('Audio can play'));
+                                audio.addEventListener('playing', () => console.log('Audio is playing'));
+                                audio.addEventListener('ended', function() {
+                                    console.log('Audio playback ended');
+                                    playButton.innerHTML = '🔊';
+                                    playButton.style.backgroundColor = '#3B82F6';
+                                    playButton.disabled = false;
+                                });
+                                
+                                audio.addEventListener('error', function(e) {
+                                    console.error('Audio error:', e);
+                                    console.error('Audio error details:', audio.error);
+                                    playButton.innerHTML = '🔊';
+                                    playButton.style.backgroundColor = '#3B82F6';
+                                    playButton.disabled = false;
+                                });
+                                
+                                // Try to play the audio
+                                const playPromise = audio.play();
+                                if (playPromise !== undefined) {
+                                    playPromise.then(() => {
+                                        console.log('Audio playback started successfully');
+                                        // Update button to show playing state
+                                        playButton.innerHTML = '▶️';
+                                        playButton.style.backgroundColor = '#10B981';
+                                    }).catch(error => {
+                                        console.error('Error playing audio:', error);
+                                        playButton.innerHTML = '❌';
+                                        playButton.style.backgroundColor = '#EF4444';
+                                        setTimeout(() => {
+                                            playButton.innerHTML = '🔊';
+                                            playButton.style.backgroundColor = '#3B82F6';
+                                            playButton.disabled = false;
+                                        }, 2000);
+                                    });
+                                }
+                            } else {
+                                console.error('No audio URL returned');
+                                playButton.innerHTML = '❌';
+                                playButton.style.backgroundColor = '#EF4444';
+                                setTimeout(() => {
+                                    playButton.innerHTML = '🔊';
+                                    playButton.style.backgroundColor = '#3B82F6';
+                                    playButton.disabled = false;
+                                }, 2000);
+                            }
+                        } catch (error) {
+                            console.error('Error playing voice:', error);
+                            playButton.innerHTML = '❌';
+                            playButton.style.backgroundColor = '#EF4444';
+                            setTimeout(() => {
+                                playButton.innerHTML = '🔊';
+                                playButton.style.backgroundColor = '#3B82F6';
+                                playButton.disabled = false;
+                            }, 2000);
+                        }
+                    });
+                    
+                    sentenceWrapper.appendChild(playButton);
+                    itemContainer.appendChild(sentenceWrapper);
                     
                     // Add save button for sentence
                     const saveButton = document.createElement('button');

@@ -461,4 +461,31 @@ body {
 .regenerate-image-btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+.sentence-wrapper {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.sentence-wrapper .editable-sentence {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.play-voice-btn {
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.play-voice-btn:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.play-voice-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
 } 

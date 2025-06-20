@@ -19,7 +19,7 @@ app = Flask(__name__, static_url_path='')
 CORS(app)  # Enable CORS for all routes
 
 # Configure OpenAI API
-openai.api_key = "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"
+openai.api_key = "your_api_key"
 
 # Global storage for image sessions
 image_sessions = {}

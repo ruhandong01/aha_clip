@@ -6,4 +6,6 @@ gtts==2.3.2
 moviepy==1.0.3
 Pillow==10.0.0
 numpy==1.24.3
-requests==2.32.4 
+requests==2.32.4
+gunicorn==21.2.0
+python-dotenv==1.0.0 

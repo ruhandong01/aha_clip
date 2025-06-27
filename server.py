@@ -13,6 +13,7 @@ import json
 from moviepy.editor import ImageClip, AudioFileClip, CompositeVideoClip, TextClip, concatenate_videoclips
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
+from config import config
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -21,8 +22,14 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__, static_url_path='')
 CORS(app)  # Enable CORS for all routes
 
-# Configure OpenAI API
-openai.api_key = "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"
+# Load configuration
+config_name = os.environ.get('FLASK_ENV', 'production')
+app.config.from_object(config[config_name])
+
+# Configure OpenAI API from environment variable
+openai.api_key = app.config.get('OPENAI_API_KEY')
+if not openai.api_key:
+    logger.error("OPENAI_API_KEY not found in environment variables")
 
 # Global storage for image sessions
 image_sessions = {}

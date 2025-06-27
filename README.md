@@ -54,3 +54,9 @@ python demo_video_generation.py
 ```
 
 ## 6. Right click and select inspect to check the browse output
+
+## Deploy on the server
+
+```bash
+./deploy.sh heroku
+```
